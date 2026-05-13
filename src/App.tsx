@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { ArrayParams } from './lib/arrayFactor';
 import { evaluateStatus } from './lib/arrayFactor';
 import { ParamPanel } from './components/ParamPanel';
@@ -16,6 +16,11 @@ const defaultParams: ArrayParams = {
 function App() {
   const [params, setParams] = useState<ArrayParams>(defaultParams);
   const metrics = useMemo(() => evaluateStatus(params), [params]);
+
+  useEffect(() => {
+    console.log('🚀 App mounted with params:', params);
+    console.log('📊 Metrics:', metrics);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 flex">

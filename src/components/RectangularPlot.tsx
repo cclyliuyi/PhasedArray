@@ -13,12 +13,28 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
   const gl = useMemo(() => detectGratingLobes(params), [params]);
 
   useEffect(() => {
+    console.log('📊 RectangularPlot useEffect running');
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('⚠️ RectangularPlot: canvas ref is null');
+      return;
+    }
+
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error('❌ RectangularPlot: cannot get 2d context');
+      return;
+    }
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    console.log('📊 Canvas rect:', rect);
+
+    if (rect.width === 0 || rect.height === 0) {
+      console.warn('⚠️ RectangularPlot: Canvas has 0 dimensions');
+      return;
+    }
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -41,6 +57,7 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 0.5;
 
+    // Horizontal grid (dB)
     for (let db = minDb; db <= maxDb; db += 10) {
       const y = padTop + plotH - ((db - minDb) / (maxDb - minDb)) * plotH;
       ctx.beginPath();
@@ -53,6 +70,7 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
       ctx.fillText(`${db} dB`, padLeft - 4, y + 3);
     }
 
+    // Vertical grid (degrees)
     for (let theta = 0; theta <= 180; theta += 30) {
       const x = padLeft + (theta / 180) * plotW;
       ctx.beginPath();
@@ -65,6 +83,7 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
       ctx.fillText(`${theta}°`, x, H - padBottom + 14);
     }
 
+    // Draw pattern
     ctx.beginPath();
     for (let i = 0; i < pattern.angles.length; i++) {
       const theta = pattern.angles[i];
@@ -88,7 +107,9 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    // Grating lobes
     if (gl.present) {
+      console.log('🚨 Grating lobes in rect plot:', gl.angles);
       gl.angles.forEach((glAngle) => {
         const glIdx = glAngle;
         if (glIdx >= 0 && glIdx <= 180) {
@@ -112,6 +133,7 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
       });
     }
 
+    // Scan direction marker
     const scanX = padLeft + (params.scanAngleDeg / 180) * plotW;
     ctx.strokeStyle = '#f97316';
     ctx.lineWidth = 1;
@@ -131,6 +153,8 @@ export const RectangularPlot: FC<RectangularPlotProps> = ({ params }) => {
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('θ (度)', W / 2, H - 8);
+
+    console.log('✅ RectangularPlot draw complete');
   }, [params, pattern, gl]);
 
   return (

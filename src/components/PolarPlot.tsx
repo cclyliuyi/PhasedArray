@@ -13,15 +13,32 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
   const gl = useMemo(() => detectGratingLobes(params), [params]);
 
   useEffect(() => {
+    console.log('📡 PolarPlot useEffect running');
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('⚠️ PolarPlot: canvas ref is null');
+      return;
+    }
+
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error('❌ PolarPlot: cannot get 2d context');
+      return;
+    }
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    console.log('📡 Canvas rect:', rect);
+
+    if (rect.width === 0 || rect.height === 0) {
+      console.warn('⚠️ PolarPlot: Canvas has 0 dimensions');
+      return;
+    }
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
+
     const W = rect.width;
     const H = rect.height;
     const cx = W / 2;
@@ -31,6 +48,7 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
 
+    // Concentric circles
     const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
     levels.forEach((level, i) => {
       ctx.strokeStyle = i === levels.length - 1 ? '#334155' : '#1e293b';
@@ -44,6 +62,7 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
       ctx.fillText(`${(level * 10).toFixed(0)}`, cx + radius * level + 4, cy + 4);
     });
 
+    // Radial grid
     for (let angle = 0; angle < 360; angle += 30) {
       const rad = ((angle - 90) * Math.PI) / 180;
       ctx.strokeStyle = '#1e293b';
@@ -59,6 +78,7 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
       ctx.fillText(`${angle}°`, cx + labelRadius * Math.cos(rad), cy + labelRadius * Math.sin(rad) + 3);
     }
 
+    // Draw pattern
     ctx.beginPath();
     for (let i = 0; i < pattern.angles.length; i++) {
       const thetaDeg = pattern.angles[i];
@@ -71,16 +91,20 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
+
     const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     gradient.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
     gradient.addColorStop(1, 'rgba(6, 182, 212, 0.05)');
     ctx.fillStyle = gradient;
     ctx.fill();
+
     ctx.strokeStyle = '#22d3ee';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    // Grating lobes
     if (gl.present) {
+      console.log('🚨 Grating lobes detected:', gl.angles);
       gl.angles.forEach((glAngle) => {
         const glIdx = glAngle;
         if (glIdx >= 0 && glIdx <= 180) {
@@ -106,6 +130,7 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
       });
     }
 
+    // Scan direction
     const scanRad = ((90 - params.scanAngleDeg) * Math.PI) / 180;
     ctx.strokeStyle = '#f97316';
     ctx.lineWidth = 2;
@@ -120,6 +145,8 @@ export const PolarPlot: FC<PolarPlotProps> = ({ params }) => {
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('极坐标方向图 (Polar Pattern)', cx, 16);
+
+    console.log('✅ PolarPlot draw complete');
   }, [params, pattern, gl]);
 
   return (

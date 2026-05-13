@@ -12,13 +12,28 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('⚠️ ArrayVisualization: canvas ref is null');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error('❌ ArrayVisualization: cannot get 2d context');
+      return;
+    }
+
+    console.log('📐 ArrayVisualization useEffect running');
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    console.log('📐 Canvas rect:', rect);
+
+    if (rect.width === 0 || rect.height === 0) {
+      console.warn('⚠️ Canvas has 0 dimensions, skipping draw');
+      return;
+    }
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -29,6 +44,7 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
 
+    // Draw grid
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 0.5;
     for (let x = 0; x < W; x += 40) {
@@ -38,12 +54,14 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
       ctx.stroke();
     }
 
+    // Array parameters
     const N = numElements;
     const dPx = Math.max(20, Math.min(50, dOverLambda * 40));
     const totalLength = (N - 1) * dPx;
     const startX = (W - totalLength) / 2;
     const centerY = H / 2;
 
+    // Draw axis line
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 5]);
@@ -58,6 +76,7 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
     ctx.textAlign = 'center';
     ctx.fillText('阵列轴 (x)', W / 2, centerY - 10);
 
+    // Draw each element
     const elementRadius = 6;
     for (let i = 0; i < N; i++) {
       const x = startX + i * dPx;
@@ -80,6 +99,7 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
       ctx.font = '9px monospace';
       ctx.fillText(`n=${i + 1}`, x, centerY + elementRadius + 14);
 
+      // Phase arrow
       const theta0 = (scanAngleDeg * Math.PI) / 180;
       const phase = i * dOverLambda * (Math.cos(0) - Math.cos(theta0)) * 2 * Math.PI;
       const arrowLen = 12;
@@ -104,11 +124,13 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
       ctx.restore();
     }
 
+    // Dimension label
     ctx.fillStyle = '#64748b';
     ctx.font = '10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText(`d = ${dOverLambda.toFixed(2)}λ`, startX + totalLength / 2, centerY + 30);
 
+    // Scan direction arrow
     if (scanAngleDeg !== 0) {
       const arrowStartX = W / 2;
       const arrowStartY = centerY - 30;
@@ -141,6 +163,7 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
       ctx.fillText(`θ = ${scanAngleDeg}°`, arrowStartX + arrowLen2 * 0.7, arrowStartY - 8);
     }
 
+    // Legend
     ctx.fillStyle = '#64748b';
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
@@ -157,6 +180,8 @@ export const ArrayVisualization: FC<ArrayVisualizationProps> = ({ params }) => {
     ctx.fill();
     ctx.fillStyle = '#64748b';
     ctx.fillText('扫描方向', 20, H - 32);
+
+    console.log('✅ ArrayVisualization draw complete');
   }, [numElements, dOverLambda, scanAngleDeg]);
 
   return (
