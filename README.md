@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# 📡 相控阵天线仿真 | Phased Array Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 均匀线性阵列方向图仿真 — 波束扫描、阵列因子、栅瓣可视化教学工具
 
-Currently, two official plugins are available:
+## 功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 📶 **波束扫描** — 实时调整扫描角度，观察波束偏转
+- 📐 **阵列因子方向图** — 极坐标 + 直角坐标双视图
+- 🚨 **栅瓣检测** — 颜色警示 + 动态演示栅瓣产生过程
+- 📊 **实时指标** — HPBW（半功率波束宽度）和 SLL（旁瓣电平）自动计算
 
-## React Compiler
+## 技术栈
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React + TypeScript + Vite
+- Tailwind CSS
+- Canvas API（纯前端可视化）
 
-## Expanding the ESLint configuration
+## 快速开始
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+本项目已配置 GitHub Actions 自动部署到 GitHub Pages。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+推送代码到 `main` 分支后，访问：
+`https://cclyliuyi.github.io/PhasedArray/`
+
+## 教学提示
+
+1. 将 **d/λ** 拖到 0.5 以上，观察栅瓣如何出现
+2. 增加 **N**，观察波束如何变窄（HPBW 减小）
+3. 拖动 **扫描角度**，观察波束如何偏转
+4. 在端射方向（±90°），波束会变宽，这是相控阵的物理限制
+
+## 核心公式
+
+均匀线性阵列阵列因子：
+
+$$AF(\theta) = \frac{1}{N} \left| \frac{\sin(N\psi/2)}{\sin(\psi/2)} \right|$$
+
+其中 $\psi = kd(\cos\theta - \cos\theta_0)$
+
+---
+
+*教学演示版 · 仅供学习使用*
